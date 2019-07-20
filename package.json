@@ -3,25 +3,20 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "jsonwebtoken": "^8.5.1",
-    "mongoose": "^5.6.4",
-    "node-uuid": "^1.4.8",
+    "axios": "^0.19.0",
+    "lodash": "^4.17.14",
     "pretty": "^2.0.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
+    "react-helmet": "^5.2.1",
     "react-router-config": "^5.0.1",
     "react-router-dom": "^5.0.1",
     "react-scripts": "3.0.1",
     "semantic-ui-css": "^2.4.1",
-    "semantic-ui-react": "^0.87.2",
-    "swagger-ui-express": "^4.0.7",
-    "sync-request": "^6.1.0"
+    "semantic-ui-react": "^0.87.2"
   },
   "scripts": {
     "start": "react-scripts start",
-    "start:server": "node ./src/server.js",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -29,6 +24,7 @@
   "eslintConfig": {
     "extends": "react-app"
   },
+  "proxy": "http://localhost:3001",
   "browserslist": {
     "production": [
       ">0.2%",

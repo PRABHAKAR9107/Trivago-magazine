@@ -59,14 +59,9 @@ class DesktopContainer extends Component {
                                         <Image src={logo} size='medium' className='triv-logo'></Image>
                                     </Menu.Item>
                                 </Link>
-                                <Menu.Item position='right'>
-                                    <Button as='a' inverted={!fixed}>
-                                        Log in
-                                    </Button>
-                                </Menu.Item>
                             </Container>
                         </Menu>
-                        <HomepageHeading />
+                        <HomepageHeading data={data} />
                     </Segment>
                 </Visibility>
 

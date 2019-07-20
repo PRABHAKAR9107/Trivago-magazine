@@ -9,35 +9,34 @@ import {
     Image,
     List,
     Segment,
-    GridColumn,
     Embed,
-    Rating
+    Rating,
 
 } from 'semantic-ui-react'
 import Fetch from '../helpers/Fetch'
 import { Link } from 'react-router-dom'
-import pretty from 'pretty';
-
+import axios from 'axios';
+import { find } from 'lodash';
 import logo from '../473a486.svg'
+import { Helmet } from "react-helmet";
+import getSrc from '../helpers/getSrc';
+import { parseHTML, isParseError } from '../helpers/parseHTML'
 
+let def;
 class Article extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             data: [],
-            rating: null,
-            id: props.location.state.id
+            rating: '',
+            articleArray: []
         }
-        this.parseHTML = this.parseHTML.bind(this);
-        this.isParseError = this.isParseError.bind(this);
-        this.getSrc = this.getSrc.bind(this);
         this.handleRate = this.handleRate.bind(this);
-        this.ratingmap = {
-            id: {
-
-            }
-        }
+        this.putDataToDB = this.putDataToDB.bind(this);
+        this.deleteFromDB = this.deleteFromDB.bind(this);
+        this.updateDataToDB = this.updateDataToDB.bind(this);
     }
+
     componentDidMount() {
         const parsedJson = Fetch(this.props.location.state.url)
         parsedJson.then(value => {
@@ -45,48 +44,90 @@ class Article extends React.Component {
                 data: value
             })
         })
+        this.getDataFromDb();
     }
 
-    isParseError(parsedDocument) {
-        // parser and parsererrorNS could be cached on startup for efficiency.
-        var parser = new DOMParser(),
-            errorneousParse = parser.parseFromString('<', 'text/xml'),
-            parsererrorNS = errorneousParse.getElementsByTagName("parsererror")[0].namespaceURI;
-
-        if (parsererrorNS === 'http://www.w3.org/1999/xhtml') {
-            return parsedDocument.getElementsByTagName("parsererror").length > 0;
-        }
-
-        return parsedDocument.getElementsByTagNameNS(parsererrorNS, 'parsererror').length > 0;
+    getDataFromDb = () => {
+        fetch('http://localhost:3001/api/getData')
+            .then((data) => data.json())
+            .then((res) => {
+                this.setState({ articleArray: res.data })
+            }).then(e => {
+                if (this.state.articleArray.length > 0 && undefined !== find(this.state.articleArray, ['id', parseInt(this.props.location.state.id)])) {
+                    def = find(this.state.articleArray, ['id', parseInt(this.props.location.state.id)]).rating;
+                    this.setState({
+                        rating: def
+                    })
+                }
+            });
     };
-
-    parseHTML(value) {
-        let p;
-        let htmlString = pretty(value);
-        let doc = new DOMParser().parseFromString(htmlString, "text/html");
-        if (this.isParseError(doc)) {
-            console.log('parsing error')
-            p = doc.firstChild.children[1]
-            return p.innerHTML;
-        }
-        p = doc.firstChild;
-        return p.textContent;
-    }
-
-    getSrc(embed) {
-        var str = embed;
-        var regex = /<iframe.*?src="(.*?)"/g;
-        var src = regex.exec(str)[1];
-        return src;
-    }
 
     handleRate(e, { rating, maxRating }) {
         this.setState({ rating, maxRating })
+        this.putDataToDB(rating)
     }
+
+    putDataToDB = (message) => {
+        if (this.state.articleArray.length > 0) {
+            let newid = this.props.location.state.id;
+            let ratingobj = find(this.state.articleArray, ['id', parseInt(newid)])
+            if (ratingobj !== undefined) {
+                this.updateDataToDB(ratingobj.id, message)
+            }
+            else {
+                axios.post('http://localhost:3001/api/putData', {
+                    id: this.props.location.state.id,
+                    rating: message,
+                })
+            }
+
+        }
+        else
+            axios.post('http://localhost:3001/api/putData', {
+                id: this.props.location.state.id,
+                rating: message,
+            }).then(e => this.setState({
+                rating: message
+            }));
+    };
+
+    updateDataToDB = (idToUpdate, updateToApply) => {
+        let objIdToUpdate = null;
+        parseInt(idToUpdate);
+        this.state.articleArray.forEach((dat) => {
+            if (dat.id == idToUpdate) {
+                objIdToUpdate = dat._id;
+            }
+        });
+        axios.post('http://localhost:3001/api/updateData', {
+            id: objIdToUpdate,
+            update: { rating: updateToApply },
+        });
+    };
+
+    deleteFromDB = (idTodelete) => {
+        parseInt(idTodelete);
+        let objIdToDelete = null;
+        this.state.articleArray.forEach((dat) => {
+            if (dat.id == idTodelete) {
+                objIdToDelete = dat._id;
+            }
+        });
+
+        axios.delete('http://localhost:3001/api/deleteData', {
+            data: {
+                id: objIdToDelete,
+            },
+        });
+        this.setState({
+            rating: null
+        })
+    };
 
     render() {
         return (
             <ResponsiveContainer res={this.state.data}>
+                <Helmet title={this.state.data.length > 0 && this.state.data.seo_meta.title} meta={{ name: 'description', content: `${this.state.data.length > 0 && this.state.data.seo_meta.metadesc}` }} />
                 <Segment className='ui-segment' vertical>
                     <Grid columns={2} doubling stackable>
                         <Grid.Row>
@@ -96,13 +137,13 @@ class Article extends React.Component {
                                 </Header>
                                 {this.state.data.content ? (
                                     <p className='excerpt-title'>
-                                        {this.parseHTML(this.state.data.content[1].text)}
+                                        {parseHTML(this.state.data.content[1].text)}
                                     </p>
                                 )
                                     : null}
                                 {this.state.data.content ? (
                                     <p className='para-layout'>
-                                        {this.parseHTML(this.state.data.content[0].text)}
+                                        {parseHTML(this.state.data.content[0].text)}
                                     </p>
                                 )
                                     : null}
@@ -111,7 +152,7 @@ class Article extends React.Component {
                             <Grid.Column floated='right' width={6}>
                                 {this.state.data.content && this.state.data.content[2].content && (
                                     <div>
-                                        <Embed placeholder={this.state.data.content[3].blocks[1].posts[2].thumbnail_url} className='embed-video' url={this.getSrc(this.state.data.content[2].content)} autoplay={true}></Embed>
+                                        <Embed placeholder={this.state.data.content[3].blocks[1].posts[2].thumbnail_url} className='embed-video' url={getSrc(this.state.data.content[2].content)} autoplay={true}></Embed>
                                     </div>
                                 )}
                                 {this.state.data.content && this.state.data.content[2].gallery && (
@@ -120,7 +161,8 @@ class Article extends React.Component {
                                     </div>
                                 )}
                                 <Header as='h2'>Rate Us:</Header>
-                                <Rating maxRating={5} onRate={this.handleRate} icon='star' size='huge' clearable={true} defaultRating={this.state.rating} />
+                                <Rating maxRating={5} onRate={this.handleRate} icon='star' size='huge' clearable={true} rating={this.state.rating} />
+                                <Button basic color='grey' onClick={() => this.deleteFromDB(this.props.location.state.id)}>Clear</Button>
                             </Grid.Column>
                         </Grid.Row>
                     </Grid>
@@ -128,61 +170,48 @@ class Article extends React.Component {
                 <Segment className='footer-segment' vertical>
                     <Grid celled='internally' columns='equal' stackable>
                         <Grid.Row textAlign='center'>
-                            <Grid.Column className='grid-column'>
-                                <Header as='h3' className='ui-header'>
-                                    "What a Company Article"
-                </Header>
-                                <p className='para-layout'>That is what they all say about us</p>
-                            </Grid.Column>
-                            <Grid.Column className='grid-column'>
-                                <Header as='h3' className='ui-header'>
-                                    "I shouldn't have gone with their competitor."
-                </Header>
-                                <p className='para-layout'>
-                                    <Image avatar src='/images/avatar/large/nan.jpg' />
-                                    <b>Nan</b> Chief Fun Officer Acme Toys
-                </p>
-                            </Grid.Column>
+                            {this.state.data.content && this.state.data.content.map(it => {
+                                if (it.type === 'text_module')
+                                    return it.blocks && it.blocks.map(item => {
+                                        if (item.type === 'related_articles')
+                                            return item.posts.map(ob => (
+                                                <Grid.Column className='grid-column'>
+                                                    <Header as='h3' className='ui-header'>
+                                                        {ob.card_title ? ob.card_title : ob.title}
+                                                    </Header>
+                                                    <p className='para-layout'>
+                                                        <Image avatar src={ob.thumbnail_url} />
+                                                        {ob.title}
+                                                    </p>
+                                                </Grid.Column>
+                                            ))
+                                    })
+                            })}
                         </Grid.Row>
                     </Grid>
                 </Segment>
 
-                <Segment className='ui-segment' vertical>
-                    <Container text>
-                        <Header as='h3' className='ui-header'>
-                            Breaking The Grid, Grabs Your Attention
-            </Header>
-                        <p className='para-layout'>
-                            Instead of focusing on content creation and hard work, we have learned how to master the
-                            art of doing nothing by providing massive amounts of whitespace and generic content that
-                            can seem massive, monolithic and worth your attention.
-            </p>
-                        <Button as='a' size='large'>
-                            Read More
-            </Button>
 
-                        <Divider
-                            as='h4'
-                            className='header ui-divider'
-                            horizontat
-                        >
-                            <a href='#'>Case Studies</a>
-                        </Divider>
-
-                        <Header as='h3' className='ui-header'>
-                            Did We Tell You About Our Bananas?
-            </Header>
-                        <p className='para-layout'>
-                            Yes I know you probably disregarded the earlier boasts as non-sequitur filler content, but
-                            it's really true. It took years of gene splicing and combinatory DNA research, but our
-                            bananas can really dance.
-            </p>
-                        <Button as='a' size='large'>
-                            I'm Still Quite Interested
-            </Button>
-                    </Container>
-                </Segment>
-
+                <Header
+                    as='h1'
+                    content='Gallery'
+                    textAlign='center'
+                    className='ui-header'
+                />
+                <Grid container columns={2} doubling stackable>
+                    {this.state.data.content && this.state.data.content.map(it => {
+                        if (it.type === 'hotel_module')
+                            return it.gallery.map(item => (
+                                <Grid.Column>
+                                    <Image src={item.url} size='large'></Image>
+                                    <Header as='h6' className='ui-header' >
+                                        {item.title}
+                                    </Header>
+                                    <Divider />
+                                </Grid.Column>
+                            ))
+                    })}
+                </Grid>
                 <Segment inverted vertical style={{ padding: '5em 0em' }}>
                     <Container>
                         <Grid divided inverted stackable>

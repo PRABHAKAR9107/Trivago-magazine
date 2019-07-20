@@ -32,6 +32,7 @@
   font-weight: normal;
   margin-bottom: 0;
   margin-top: 1.5em;
+  
 }
 
 .desktop-heading-home-h1 {
@@ -61,9 +62,9 @@
 }
 
 .desktop-menu-segment {
-  min-height: 700 !important;
+  min-height: 750 !important;
   padding: 1em 0em !important;
- background-image: url('http://pluspng.com/img-png/hawaii-png-hd-idyllic-island-beach-shore-sky-nature-beautiful-footage-sea-water-vacation-travel-tourism-hawaii-peaceful-hd-3840.png') !important;
+ background-image: url('https://d2v9y0dukr6mq2.cloudfront.net/video/thumbnail/EeN01lAOxijss6byx/videoblocks-back-side-view-of-man-relaxing-on-the-beach-outdoors-background-using-smartphone-barefoot-luxury-relaxation-business-sea-ocean-freelancer_rc7f8v_8f_thumbnail-full04.png') !important;
   background-size: cover !important;
   width: 100%;
 }
@@ -108,4 +109,14 @@ font-size: 1.20em;
 
 .ui.vertical.segment.ui-segment {
   padding: 10em 6em !important;
+}
+
+h1.ui.center.aligned.header.ui-header {
+  padding-bottom: 34px;
+}
+
+.ui.fluid.card {
+  width: 100%;
+  max-width: 9999px;
+  min-height: 450px !important;
 }
