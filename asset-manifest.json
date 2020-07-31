@@ -1,0 +1,20 @@
+{
+  "files": {
+    "main.css": "/trivago-magazine/static/css/main.87b3bcf6.chunk.css",
+    "main.js": "/trivago-magazine/static/js/main.320d1ae1.chunk.js",
+    "main.js.map": "/trivago-magazine/static/js/main.320d1ae1.chunk.js.map",
+    "runtime~main.js": "/trivago-magazine/static/js/runtime~main.768f7e0c.js",
+    "runtime~main.js.map": "/trivago-magazine/static/js/runtime~main.768f7e0c.js.map",
+    "static/css/2.1fbda9b8.chunk.css": "/trivago-magazine/static/css/2.1fbda9b8.chunk.css",
+    "static/js/2.acfd7316.chunk.js": "/trivago-magazine/static/js/2.acfd7316.chunk.js",
+    "static/js/2.acfd7316.chunk.js.map": "/trivago-magazine/static/js/2.acfd7316.chunk.js.map",
+    "index.html": "/trivago-magazine/index.html",
+    "precache-manifest.8cdf2cc857541c7692e2e5c8c06bf553.js": "/trivago-magazine/precache-manifest.8cdf2cc857541c7692e2e5c8c06bf553.js",
+    "service-worker.js": "/trivago-magazine/service-worker.js",
+    "static/css/2.1fbda9b8.chunk.css.map": "/trivago-magazine/static/css/2.1fbda9b8.chunk.css.map",
+    "static/css/main.87b3bcf6.chunk.css.map": "/trivago-magazine/static/css/main.87b3bcf6.chunk.css.map",
+    "static/media/473a486.svg": "/trivago-magazine/static/media/473a486.473a4869.svg",
+    "static/media/semantic.min.css": "/trivago-magazine/static/media/outline-icons.ef60a4f6.woff",
+    "static/media/logo1.svg": "/trivago-magazine/static/media/logo1.35cedd4f.svg"
+  }
+}
